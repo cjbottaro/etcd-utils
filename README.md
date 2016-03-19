@@ -49,9 +49,9 @@ Etcd::Utils.dump(["hi", "bye", "blah"], root: "/array_demo")
 That will produce the following key/value pairs in Etcd:
 
 ```
-/array_demo/01, hi
-/array_demo/02, bye
-/array_demo/03, blah
+/array_demo/00, hi
+/array_demo/01, bye
+/array_demo/02, blah
 ```
 
 Now if you load that key...
