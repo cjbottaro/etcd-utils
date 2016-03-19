@@ -31,8 +31,14 @@ module Etcd
         end
       end
 
+      # TODO make an option not to sort (may be too slow).
       def node_to_array(node)
-        node["nodes"].map{ |n| handle_node(n) }
+        # Is this too clever?
+        #   { "01" => "bar", "00" => "foo", "02" => "baz" }  # node_to_hash
+        #   [ ["01", "bar"], ["00", "foo"], ["02", "baz"] ]  # to_a
+        #   [ ["00", "foo"], ["01", "bar"], ["02", "baz"] ]  # sort
+        #   [ "foo", "bar", "baz" ]                          # map
+        node_to_hash(node).to_a.sort.map(&:last)
       end
 
       def node_to_hash(node)
