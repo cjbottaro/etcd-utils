@@ -30,15 +30,6 @@ describe Etcd::Utils do
     expect(get("/baz")).to eq("hi")
   end
 
-  it "writes arrays" do
-    array = ["foo", "bar", "baz"]
-    Etcd::Utils.dump(array, root: "/array_demo")
-
-    expect(get("/array_demo/00")).to eq("foo")
-    expect(get("/array_demo/01")).to eq("bar")
-    expect(get("/array_demo/02")).to eq("baz")
-  end
-
   it "reads nested hashes" do
     set("/foo/bar/00", value: 1)
     set("/foo/bar/01", value: 2)
@@ -46,6 +37,15 @@ describe Etcd::Utils do
     set("/baz", value: "hi")
 
     expect(Etcd::Utils.load).to eq({ "foo" => { "bar" => %w[1 2 3] }, "baz" => "hi" })
+  end
+
+  it "writes arrays" do
+    array = ["foo", "bar", "baz"]
+    Etcd::Utils.dump(array, root: "/array_demo")
+
+    expect(get("/array_demo/00")).to eq("foo")
+    expect(get("/array_demo/01")).to eq("bar")
+    expect(get("/array_demo/02")).to eq("baz")
   end
 
   it "reads arrays" do
