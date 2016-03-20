@@ -21,62 +21,78 @@ describe Etcd::Utils do
   end
 
   it 'writes nested hashes' do
-    hash = { foo: { bar: [1, 2, 3] }, baz: "hi" }
-    Etcd::Utils.dump(hash)
+    dump(foo: { bar: [1, 2, 3] }, baz: "hi")
 
-    expect(get("/foo/bar/00")).to eq("1")
-    expect(get("/foo/bar/01")).to eq("2")
-    expect(get("/foo/bar/02")).to eq("3")
-    expect(get("/baz")).to eq("hi")
+    expect_get "/foo/bar/00", "1"
+    expect_get "/foo/bar/01", "2"
+    expect_get "/foo/bar/02", "3"
+    expect_get "/baz", "hi"
   end
 
   it "reads nested hashes" do
-    set("/foo/bar/00", value: 1)
-    set("/foo/bar/01", value: 2)
-    set("/foo/bar/02", value: 3)
-    set("/baz", value: "hi")
+    set "/foo/bar/00", 1
+    set "/foo/bar/01", 2
+    set "/foo/bar/02", 3
+    set "/baz", "hi"
 
-    expect(Etcd::Utils.load).to eq({ "foo" => { "bar" => %w[1 2 3] }, "baz" => "hi" })
+    expect_load("foo" => { "bar" => %w[1 2 3] }, "baz" => "hi")
   end
 
   it "writes arrays" do
-    array = ["foo", "bar", "baz"]
-    Etcd::Utils.dump(array, root: "/array_demo")
+    dump ["foo", "bar", "baz"], root: "/array_demo"
 
-    expect(get("/array_demo/00")).to eq("foo")
-    expect(get("/array_demo/01")).to eq("bar")
-    expect(get("/array_demo/02")).to eq("baz")
+    expect_get "/array_demo/00", "foo"
+    expect_get "/array_demo/01", "bar"
+    expect_get "/array_demo/02", "baz"
   end
 
   it "reads arrays" do
-    set "/array_demo/00", value: "foo"
-    set "/array_demo/01", value: "bar"
-    set "/array_demo/02", value: "baz"
+    set "/array_demo/00", "foo"
+    set "/array_demo/01", "bar"
+    set "/array_demo/02", "baz"
 
-    expect(Etcd::Utils.load(root: "/array_demo")).to eq(%w[foo bar baz])
-    expect(Etcd::Utils.load).to eq("array_demo" => %w[foo bar baz])
+    expect_load({ root: "/array_demo" }, %w[foo bar baz])
+    expect_load "array_demo" => %w[foo bar baz]
   end
 
   it "writes scalars" do
-    Etcd::Utils.dump("chris", root: "/name")
-    expect(get("/name")).to eq("chris")
+    dump "chris", root: "/name"
+    expect_get "/name", "chris"
   end
 
   it "reads scalars" do
-    set "/name", value: "chris"
-    expect(Etcd::Utils.load(root: "/name")).to eq("chris")
+    set "/name", "chris"
+    expect_load({ root: "/name" }, "chris")
   end
 
-  def get(*args)
-    client.get(*args).value
+  def dump(*args)
+    Etcd::Utils.dump(*args)
   end
 
-  def set(*args)
-    client.set(*args)
+  def load(*args)
+    Etcd::Utils.load(*args)
+  end
+
+  def expect_load(*args)
+    if args.length == 1
+      expect(load).to eq(args.first)
+    elsif args.length == 2
+      expect(load(args.first)).to eq(args.last)
+    else
+      raise "unexpected args: #{args.inspect}"
+    end
+  end
+
+  def expect_get(key, value)
+    expect( client.get(key).value ).to eq(value)
+  end
+
+  def set(key, value)
+    client.set(key, value: value)
   end
 
   def client
-    @client ||= ::Etcd.client
+    @client ||= Etcd.client
   end
 
 end
