@@ -11,7 +11,8 @@ module Etcd
       prefix: "/v2/keys",
       root: "/",
       redirect_limit: 2,
-      index_padding: "+1"
+      index_padding: "+1",
+      cast_values: false
     }
 
     def self.defaults

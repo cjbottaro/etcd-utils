@@ -49,7 +49,30 @@ module Etcd
       end
 
       def node_to_value(node)
-        node["value"]
+        case options[:cast_values]
+        when Proc
+          options[:cast_values].call( node["value"] )
+        when true
+          cast_value( node["value"] )
+        else
+          node["value"]
+        end
+      end
+
+      def cast_value(value)
+        if value == ""
+          nil
+        elsif value =~ /^[+-]?\d+\.\d+$/
+          value.to_f
+        elsif value =~ /^[+-]?\d+$/
+          value.to_i
+        elsif value.strip.downcase == "true"
+          true
+        elsif value.strip.downcase == "false"
+          false
+        else
+          value
+        end
       end
 
       def root_node
