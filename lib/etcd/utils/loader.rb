@@ -13,7 +13,14 @@ module Etcd
       end
 
       def call
-        NodeParser.new(root_node, options).call
+        case options[:root]
+        when String
+          NodeParser.new(root_node, options).call
+        when Hash
+          NodeParser.new(options[:root], options).call
+        else
+          raise ArgumentError, "expecting string or hash"
+        end
       end
 
       def root_node
