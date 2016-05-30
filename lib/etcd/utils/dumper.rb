@@ -8,8 +8,10 @@ module Etcd
         @object = object
         @options = Etcd::Utils.defaults.merge(options)
 
-        @root = options[:root]
+        @root = @options[:root]
         @traverse_callback = nil
+
+        @root = @root.strip.chomp("/") # So we don't get keys like "/blah//some/path"
       end
 
       def call

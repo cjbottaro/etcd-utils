@@ -65,6 +65,35 @@ describe Etcd::Utils do
     expect_load({ root: "/name" }, "chris")
   end
 
+  it "dumper doesn't produce double slashes" do
+    
+    hash = {
+      "cassandra" => {
+        "replication_factor" => 2,
+        "hosts" => [
+          "node1.foo.com",
+          "node2.foo.com"
+        ]
+      }
+    }
+
+    dumper = Etcd::Utils::Dumper.new(hash)
+    dumper.traverse do |k, v|
+      expect(k).to_not match("//")
+    end
+
+    dumper = Etcd::Utils::Dumper.new(hash, root: "/")
+    dumper.traverse do |k, v|
+      expect(k).to_not match("//")
+    end
+
+    dumper = Etcd::Utils::Dumper.new(hash, root: "/foo/")
+    dumper.traverse do |k, v|
+      expect(k).to_not match("//")
+    end
+
+  end
+
   def dump(*args)
     Etcd::Utils.dump(*args)
   end
